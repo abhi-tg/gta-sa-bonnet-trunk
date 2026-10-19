@@ -1,0 +1,30 @@
+name: Build AML Plugin
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Android NDK
+        uses: nmdhgv/setup-ndk@v1
+        with:
+          ndk-version: r25b
+
+      - name: Build arm64-v8a (.so)
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+                -DANDROID_ABI=arm64-v8a \
+                -DANDROID_PLATFORM=android-24 ..
+          make
+
+      - name: Upload Finished Plugin
+        uses: actions/upload-artifact@v3
+        with:
+          name: libCarBonnetTrunk-64bit
+          path: build/libCarBonnetTrunk.so
+          
